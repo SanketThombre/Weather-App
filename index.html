@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;500&family=Poppins&display=swap"
+    rel="stylesheet" />
+    <title>Weather Application</title>
+
+    <style>
+        #searchdiv {
+     width: 100%;
+     height: 100px;
+     display: flex;
+    
+ }
+ #searchdiv h2{
+     font-size: 25px;
+     font-weight: bold;
+     color: cyan;
+ }
+ #city {
+     width: 350px;
+     height: 40px;
+     margin: 15px 20px;
+     text-align: center;
+     border-radius: 10px;
+ }
+ #search {
+      width: 100px;
+    height: 40px;
+    margin-top: 17px; 
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: cyan;
+    background-color: black;
+    border: 0px;
+    cursor: pointer;
+  }
+
+  body {
+      background-image: url(https://images.unsplash.com/photo-1570670396774-20e1c3ce7f16?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEyMDd9);
+   background-repeat: no-repeat;
+   background-size: cover;
+   overflow: hidden;
+   height: 100vh;
+   font-family: "Poppins", sans-serif;
+     } 
+     
+     #region {
+         width: 200px;
+         height: 100px;
+         color: whitesmoke;
+        margin-left: 620px;
+        text-align: center;
+        border-radius: 10px;
+         background: rgba(24, 24, 27, 0.6);
+         display: none;
+     }
+
+     #tempinfo {
+        width: 250px;
+        height: 250px;
+        margin-left: 100px;
+        padding: 5px;
+         color: whitesmoke;
+         
+     }
+     #tempinfo h3,p {
+         font-size: 30px;
+         margin-left: 10px;
+     }
+
+     #tempinfo div {
+         width: 90%;
+         height: 140px;
+         border: white 1px solid;
+         text-align: center;
+         border-radius: 10px;
+         background: rgba(24, 24, 27, 0.6);
+         
+
+     }
+     #forecast {
+         display: flex;
+     }
+
+     #map {
+         width: 40%;
+         height: 350px;
+         margin-left: 200px;
+        
+     }
+
+     #days {
+         width: 95%;
+         height: 200px;
+         border: black 1px solid;
+         margin: auto;
+         margin-top: 50px;
+         display: grid;
+         grid-template-columns: repeat(7,1fr);
+         grid-template-rows: 180px;
+         grid-gap:25px;
+         padding: 20px;
+         background: rgba(24, 24, 27, 0.6);
+         display: none;
+     }
+     #days>div {
+         border: whitesmoke 1.5px solid;
+         border-radius: 10px;
+         background-color: #172329;
+         color: whitesmoke;
+     }
+
+     #days h5 {
+         text-align: center;
+        
+     }
+
+     #days p {
+         font-size: 15px;
+
+     }
+     img {
+         width: 50px;
+         height: 50px;
+     }
+      </style>
+</head>
+<body>
+   
+   <div id="searchdiv">
+    <h2>Search Cities :</h2>
+    <input type="text" id="city" placeholder="Enter City name">
+    <button id="search" onclick="getWeather()">Search</button>
+
+    <div id="region"></div>
+     </div>
+
+ <div id="forecast">
+     <div id="tempinfo"></div>
+      <div id="map"></div>  
+     </div>
+
+     <div id="days"></div>
+ </div>
+</body>
+</html>
+
+<script>
+//
+let dailydata;
+
+async function getWeather(){
+try{
+    var city = document.getElementById("city").value;
+   
+let map = document.querySelector("#map");
+map.innerHTML = 
+`<iframe width="610" height="350" id="gmap_canvas" src="https://maps.google.com/maps?q=${city}=&z=11&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>`;
+
+    let response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=10c4cbada812a8d40d0d6e944b86cc8d&units=metric`);
+
+    let data = await response.json();
+     
+    let lon = data.coord.lon;
+    let lat = data.coord.lat;
+
+   let vatavaran = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=hourly,minutely&appid=10c4cbada812a8d40d0d6e944b86cc8d&units=metric`)
+   let res = await vatavaran.json();
+    dailydata = res.daily;
+    showweather(dailydata,data);
+    console.log("data:",dailydata);
+   
+
+
+}catch(err){
+console.log(err);
+}
+}
+
+
+
+function showweather(newday,weather) {
+let tempinfo = document.querySelector("#tempinfo");
+tempinfo.innerHTML = "";
+let weatherinfo = document.createElement("div");
+let region = document.querySelector("#region");
+region.innerHTML="";
+
+//let time =document.createElement("p");
+
+//let day = document.createElement("p");
+
+    let temp = document.createElement("h4");
+    temp.innerText = `Temperature - ${weather.main.temp}°`;
+
+    let pressure = document.createElement("h4");
+    pressure.innerText  = `pressure - ${weather.main.pressure}°`;
+
+    let humidity = document.createElement("h4");
+    humidity.innerText  = `Humidity - ${weather.main.humidity}%`;
+
+    let timezone = document.createElement("h3");
+    let dateel = document.createElement("p");
+
+    let dayss = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    let months =["Jan","Feb","Mar","April","May","June","July","Aug","Sep","Oct","Nov","Dec"];
+
+    setInterval(() => {
+     let time = new Date();
+     let month = time.getMonth();
+     let date = time.getDate();
+     var day = time.getDay();
+     let hour = time.getHours();
+     let In12hour = hour>=13 ? hour %12:hour;
+     let minutes = time.getMinutes();
+     let ampm = hour >=12 ? "Pm" : "Am"
+
+     timezone.innerHTML = In12hour + ":" + minutes + " " + ampm;
+
+    dateel.innerHTML=dayss[day] + ", " + date + ' ' + months[month]
+
+    },1000);
+
+weatherinfo.append(temp,pressure,humidity);
+
+tempinfo.append(timezone,dateel,weatherinfo);
+
+
+
+// City name and Country
+
+let cityname = document.createElement("h3");
+cityname.innerText = `City : ${weather.name}`
+
+let country = document.createElement("h3");
+country.innerText = weather.sys.country;
+
+region.append(cityname,country);
+region.style.display = "block";
+
+// data for week days
+
+
+let days = document.querySelector("#days");
+    days.innerHTML = "";
+days.style.display = "grid";
+
+
+newday.forEach(function(ele){
+   
+    
+let weatherdiv = document.createElement("div");
+let curday = document.createElement("h5");
+var daysss = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+ var dayNum = new Date(ele.dt * 1000).getDay();
+
+ let weathericon = document.createElement("div");
+let weatherimg =  document.createElement("img");
+let desc = document.createElement("p");
+desc.innerHTML = ele.weather[0].description;
+
+weathericon.append(weatherimg,desc);
+weathericon.style.display="flex";
+
+let minmax =  document.createElement("div");
+let min =  document.createElement("p");
+let max =  document.createElement("p");
+curday.innerHTML=daysss[dayNum] ;
+weatherimg.src=`http://openweathermap.org/img/wn//${ele.weather[0].icon}@4x.png`;
+min.innerHTML = `Min: ${ele.temp.min}`;
+max.innerHTML = `Max: ${ele.temp.max}`;
+
+minmax.append(min,max);
+minmax.style.display="flex";
+minmax.style.justifyContent="spaceBetween";
+
+weatherdiv.append(curday,weathericon,minmax);
+days.append(weatherdiv);
+
+})
+
+
+}
+</script>
